@@ -7,6 +7,12 @@ public class PlayerMove : MonoBehaviour
     public float speed = 10f;
     public Rigidbody2D rb2d;
     public int health = 100;
+    [SerializeField] private Transform FOVTransform;
+
+    private void Update()
+    {
+        UpdateFOV();
+    }
 
     private void FixedUpdate()
     {
@@ -16,14 +22,29 @@ public class PlayerMove : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        collision.gameObject.GetComponent<EnemyScript>().CanMove = false;
-        Debug.Log("Collision detected with: " + collision.gameObject.name);
-        health -= 5;
-        Debug.Log(health);
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            collision.gameObject.GetComponent<EnemyScript>().CanMove = false;
+            Debug.Log("Collision detected with: " + collision.gameObject.name);
+            health -= 5;
+            Debug.Log(health);
+        }
     }
 
     private void OnCollisionExit2D(Collision2D other)
     {
-        other.gameObject.GetComponent<EnemyScript>().CanMove = true;
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            other.gameObject.GetComponent<EnemyScript>().CanMove = true;
+        }
+    }
+
+    private void UpdateFOV()
+    {
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 dir = (mousePosition - transform.position).normalized;
+        // FOVTransform.forward = dir;
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        FOVTransform.rotation = Quaternion.Euler(new Vector3(0, 0, angle - 90));
     }
 }
